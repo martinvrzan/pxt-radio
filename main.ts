@@ -12,29 +12,51 @@
 //radio.onReceivedString(function(receivedString: string) {}) - příjme znak
 
 radio.setGroup(28)
-radio.setFrequencyBand(0)
-radio.setTransmitPower(4)
-
-enum STAV {
-    ready,
-    run,
-    finish,
-}
 Sensors.SetLightLevel()
+radio.setTransmitPower(7)
 
-let mode: STAV = STAV.ready as STAV
+let start: boolean = false
+let end: boolean = false
+let cas: number = 0
 
-
-if (mode === STAV.finish) {
-
-}
 Sensors.OnLightDrop(function () {
-    if (mode === STAV.ready) {
-        music.playTone(500, 400)
-        radio.sendString("start")
-        
-        if (radio.sendString("start")) { let mode: STAV = STAV.run as STAV }
+    if (!start) {
+        radio.sendNumber(1)
+        start = true
+        basic.showNumber(1)
     }
 })
+
+radio.onReceivedValue(function (time: string, ftime: number) {
+    if (start) {
+        console.log(ftime)
+        basic.showNumber(ftime)
+        cas = ftime
+    }
+})
+
+input.onButtonPressed(Button.A, function () {
+    Sensors.SetLightLevel()
+    basic.showNumber(cas)
+    basic.clearScreen()
+})
+
+input.onButtonPressed(Button.B, function () {
+    radio.sendNumber(2)
+    start = false
+    basic.showString("X")
+    Sensors.SetLightLevel()
+    music.playTone(600, 200)
+    basic.clearScreen()
+})
+
+input.onButtonPressed(Button.AB, function () {
+    radio.sendNumber(3)
+    start = false
+    Sensors.SetLightLevel()
+    music.playTone(150, 200)
+    basic.clearScreen()
+})
+
 
 
